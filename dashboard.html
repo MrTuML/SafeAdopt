@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Adopt - Panel Interno</title>
+  
+  <!-- Space Mono Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind Config para Brutalismo -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bg: '#d4d4d8',
+              green: '#22c55e',
+              orange: '#f97316',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            mono: ['"Space Mono"', 'monospace'],
+          },
+          boxShadow: {
+            'brutal': '4px 4px 0px 0px rgba(0,0,0,1)',
+            'brutal-hover': '2px 2px 0px 0px rgba(0,0,0,1)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Space Mono', monospace;
+      background-color: #d4d4d8;
+      color: #000;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      background-color: #f4f4f5;
+    }
+
+    /* Ocultar elementos de UI */
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- NAVBAR -->
+  <header class="bg-brand-purple text-white p-4 border-b-4 border-black shadow-brutal flex justify-between items-center z-10 relative">
+    <div class="flex items-center gap-4">
+      <h1 class="text-2xl font-bold uppercase tracking-tighter bg-black px-2 py-1">Safe Adopt</h1>
+      <span class="font-bold hidden md:inline">| Base de Datos Restringida</span>
+    </div>
+    <div>
+      <button id="btn-logout" class="bg-white text-black px-4 py-2 font-bold border-4 border-black shadow-brutal hover:bg-zinc-200 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all">
+        Cerrar Sesión
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 p-4 md:p-8 max-w-6xl w-full mx-auto flex flex-col gap-8">
+    
+    <!-- CONTROLES SUPERIORES: BUSCADOR Y BOTON AÑADIR -->
+    <div class="flex flex-col md:flex-row gap-6 justify-between items-start md:items-stretch">
+      
+      <!-- BUSCADOR -->
+      <div class="flex-1 w-full bg-white p-6 border-4 border-black shadow-brutal">
+        <h2 class="text-xl font-bold mb-4 uppercase border-b-4 border-black pb-2">Buscar Registro</h2>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <input type="text" id="search-input" placeholder="Buscar por DNI (Hash) o Nombre..." class="flex-1 p-3 border-4 border-black bg-brand-bg focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all text-lg font-bold">
+          <button id="btn-search" class="bg-brand-green px-8 py-3 font-bold border-4 border-black uppercase shadow-brutal hover:bg-green-400 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all">
+            Buscar
+          </button>
+        </div>
+      </div>
+
+      <!-- BOTON AÑADIR NUEVO REPORTE -->
+      <div class="md:w-auto w-full flex">
+        <button id="btn-open-modal" class="w-full bg-brand-orange h-full p-6 font-bold border-4 border-black uppercase text-xl shadow-brutal hover:bg-orange-400 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all flex flex-col items-center justify-center gap-2 text-center">
+          <span class="text-4xl">+</span>
+          <span>Añadir Nuevo<br>Reporte</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RESULTADOS DE BUSQUEDA -->
+    <div class="bg-white p-6 border-4 border-black shadow-brutal flex-1">
+      <h2 class="text-xl font-bold mb-6 uppercase border-b-4 border-black pb-2">Resultados</h2>
+      
+      <div id="results-container" class="flex flex-col gap-4">
+        <!-- Mockup Data Inicial -->
+        <div class="p-4 border-4 border-black bg-zinc-100 flex flex-col md:flex-row gap-4 justify-between md:items-center shadow-brutal">
+          <div>
+            <h3 class="font-bold text-lg mb-1">DNI Hash: a8f5f167f44f4964...</h3>
+            <p class="mb-1"><span class="font-bold bg-black text-white px-1">Motivo:</span> Abandono Reiterado</p>
+            <p class="text-sm">Madrid, 28012 - Reportado por: Protectora El Refugio</p>
+          </div>
+          <div>
+            <button class="bg-brand-purple text-white px-4 py-2 font-bold border-4 border-black shadow-brutal hover:bg-purple-400 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all">
+              Ver Detalles
+            </button>
+          </div>
+        </div>
+        <!-- End Mockup Data -->
+      </div>
+      
+      <div id="no-results" class="hidden text-center p-8 border-4 border-black bg-brand-bg font-bold mt-4">
+        No se han encontrado registros con esos datos.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL AÑADIR REPORTE -->
+  <div id="modal-report" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white w-full max-w-2xl border-4 border-black shadow-brutal max-h-[90vh] flex flex-col">
+      
+      <!-- Header Modal -->
+      <div class="bg-brand-orange p-4 border-b-4 border-black flex justify-between items-center">
+        <h2 class="text-2xl font-bold uppercase">Registrar No Apto</h2>
+        <button id="btn-close-modal" class="font-bold text-2xl hover:text-white transition-colors px-2">X</button>
+      </div>
+      
+      <!-- Body Modal -->
+      <div class="p-6 overflow-y-auto">
+        <div class="bg-black text-white p-3 font-bold text-sm mb-6 border-4 border-brand-purple">
+          ⚠️ El DNI será convertido en Hash por normativa RGPD antes de almacenarse. Asegúrese de que los datos sean correctos.
+        </div>
+        
+        <form id="form-report" class="flex flex-col gap-4">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold mb-1">DNI / NIE</label>
+              <input type="text" id="rep-dni" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Nombre Completo</label>
+              <input type="text" id="rep-nombre" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+            </div>
+          </div>
+          
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold mb-1">Edad</label>
+              <input type="number" id="rep-edad" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+            </div>
+            <div>
+              <label class="block font-bold mb-1">Código Postal</label>
+              <input type="text" id="rep-cp" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block font-bold mb-1">Dirección Completa</label>
+            <input type="text" id="rep-direccion" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+          </div>
+          
+          <div>
+            <label class="block font-bold mb-1">Motivo del Reporte</label>
+            <select id="rep-motivo" required class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all font-bold">
+              <option value="">Seleccione motivo principal...</option>
+              <option value="abandono">Abandono</option>
+              <option value="devolucion">Devolución injustificada</option>
+              <option value="maltrato">Maltrato</option>
+              <option value="cazador">Cazador con historial negativo</option>
+              <option value="otros">Otros</option>
+            </select>
+          </div>
+          
+          <div>
+            <label class="block font-bold mb-1">Pruebas o Informe Interno</label>
+            <textarea id="rep-pruebas" rows="3" placeholder="Detalles de la denuncia o situación..." class="w-full p-3 border-4 border-black bg-zinc-100 focus:bg-white shadow-brutal focus:shadow-brutal-hover transition-all"></textarea>
+          </div>
+          
+          <div>
+            <label class="block font-bold mb-1">Adjuntar Archivos</label>
+            <input type="file" id="rep-archivos" class="w-full p-2 border-4 border-black bg-white shadow-brutal focus:shadow-brutal-hover transition-all">
+          </div>
+          
+          <button type="submit" class="w-full py-4 mt-4 bg-brand-green border-4 border-black font-bold text-xl uppercase shadow-brutal hover:bg-green-400 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all">
+            Registrar Perfil
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Supabase UMD Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+  <script>
+    // Función para hashear el DNI (SHA-256)
+    async function hashDNI(dni) {
+      const msgBuffer = new TextEncoder().encode(dni.trim().toUpperCase());
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      return hashHex;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Verificación de Sesión Mock
+      if (localStorage.getItem('safeAdoptLoggedIn') !== 'true') {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      // Elementos UI
+      const btnLogout = document.getElementById('btn-logout');
+      const btnOpenModal = document.getElementById('btn-open-modal');
+      const btnCloseModal = document.getElementById('btn-close-modal');
+      const modalReport = document.getElementById('modal-report');
+      const formReport = document.getElementById('form-report');
+      
+      const searchInput = document.getElementById('search-input');
+      const btnSearch = document.getElementById('btn-search');
+      const resultsContainer = document.getElementById('results-container');
+      const noResults = document.getElementById('no-results');
+
+      // Funciones Modal
+      const openModal = () => {
+        modalReport.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; 
+      };
+
+      const closeModal = () => {
+        modalReport.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      };
+
+      btnOpenModal.addEventListener('click', openModal);
+      btnCloseModal.addEventListener('click', closeModal);
+
+      // Logout
+      btnLogout.addEventListener('click', () => {
+        localStorage.removeItem('safeAdoptLoggedIn');
+        window.location.href = 'index.html';
+      });
+
+      // Cerrar al hacer clic fuera del modal
+      modalReport.addEventListener('click', (e) => {
+        if (e.target === modalReport) {
+          closeModal();
+        }
+      });
+
+      // Manejar envío del formulario
+      formReport.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const rawDNI = document.getElementById('rep-dni').value;
+        const hashedDni = await hashDNI(rawDNI);
+        
+        alert(`Simulación: Registro exitoso.\nHash generado: ${hashedDni.substring(0, 16)}...`);
+        formReport.reset();
+        closeModal();
+        
+        searchInput.value = rawDNI;
+        btnSearch.click();
+      });
+
+      // Manejar Búsqueda
+      btnSearch.addEventListener('click', async () => {
+        const query = searchInput.value.trim();
+        if (!query) return;
+
+        let searchQuery = query;
+        const isDni = /^[0-9]{8}[A-Za-z]$/.test(query) || /^[XYZxyz][0-9]{7}[A-Za-z]$/.test(query);
+        
+        if (isDni) {
+          searchQuery = await hashDNI(query);
+        }
+
+        resultsContainer.innerHTML = '';
+        
+        if (query.includes('123') || query.length > 5) {
+          noResults.classList.add('hidden');
+          const hashCorto = isDni ? searchQuery.substring(0, 16) : 'a8f5f167f44f4964';
+          
+          resultsContainer.innerHTML = `
+            <div class="p-4 border-4 border-black bg-brand-orange/20 flex flex-col md:flex-row gap-4 justify-between md:items-center shadow-brutal mt-4">
+              <div>
+                <h3 class="font-bold text-lg mb-1">DNI Hash: ${hashCorto}...</h3>
+                <p class="mb-1"><span class="font-bold bg-black text-white px-1">Motivo:</span> ${isDni ? 'Abandono' : 'Maltrato'}</p>
+                <p class="text-sm">Registro encontrado mediante simulación de búsqueda.</p>
+              </div>
+              <div>
+                <button class="bg-brand-purple text-white px-4 py-2 font-bold border-4 border-black shadow-brutal hover:bg-purple-400 active:shadow-brutal-hover active:translate-y-0.5 active:translate-x-0.5 transition-all">
+                  Ver Detalles
+                </button>
+              </div>
+            </div>
+          `;
+        } else {
+          noResults.classList.remove('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
